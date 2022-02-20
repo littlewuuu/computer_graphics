@@ -27,6 +27,16 @@ Eigen::Matrix4f get_model_matrix(float rotation_angle)
     // Create the model matrix for rotating the triangle around the Z axis.
     // Then return it.
 
+    float radian = rotation_angle*MY_PI/180; //change le form of angle
+    
+    Eigen::Matrix4f rotate; //define rotate matrix
+    rotate<< cos(radian),-1*sin(radian),0,0,
+            sin(radian),cos(radian),0,0,
+            0,0,1,0,
+            0,0,0,
+
+    model = rotate*model;
+
     return model;
 }
 
@@ -40,6 +50,36 @@ Eigen::Matrix4f get_projection_matrix(float eye_fov, float aspect_ratio,
     // TODO: Implement this function
     // Create the projection matrix for the given parameters.
     // Then return it.
+
+    //define a persp->ortho matrix
+    Eigen::Matrix4f P2O = Eigen::Matrix4f::Identity();
+    P2O<< zNear, 0,0,0,
+        0,zNear,0,0,
+        0,0,zNear+zFar,-1*zNear*zFar,
+        0,0,1,0;
+
+    //get parameters
+    float halfeyeangel = eye_fov/2.0/180.0*MY_PI;
+    float t = zNear*std::tan(halfeyeangel);
+    float b = -1*t;
+    float r = t*aspect_ratio;
+    float l = -1*r;
+
+    //define a translate matrix
+    Eigen::Matrix4f Translate = Eigen::Matrix4f::Identity();
+    Translate << 1,0,0,-1*(r+l)/2.0,
+                0,1,0,-1*(t+b)/2.0,
+                0,0,1,-1*(zNear+zFar)/2.0,
+                0,0,0,1;
+
+    //define a scale matrix
+    Eigen::Matrix4f Scale = Eigen::Matrix4f::Identity();\
+    Scale << 2.0/(r-l),0,0,0,
+            0,2.0/(t-b),0,0,
+            0,0,2.0/(zNear-zFar),0,
+            0,0,0,1;
+
+    projection = Scale*Translate*P2O;
 
     return projection;
 }
@@ -115,4 +155,7 @@ int main(int argc, const char** argv)
     }
 
     return 0;
+    //not able to run
+
+
 }
